@@ -2,266 +2,305 @@ import streamlit as st
 
 
 # =========================================================================
-# SCOPED LIGHT-THEME OVERRIDE — "editor file" redesign
+# PYSOURCE HUB — "Circuit Slate" home page
 # -------------------------------------------------------------------------
-# app.py injects a global dark theme for the workspace tab. This page still
-# needs its own look — but instead of a marketing-style nav+card grid, the
-# whole page is framed as a single open source file in an editor: a tab
-# bar, line numbers, a docstring hero, a dict-literal stat block, and the
-# 4-step guide rendered as an actual function body. Everything is scoped
-# under #ph-welcome-root so the dark workspace tab is untouched.
+# Design language: the brand mark (twin-snake shield, {} core, circuit
+# leads) is rebuilt as inline SVG and used as the literal source of the
+# page's ambient circuit-trace pattern — the logo isn't a badge sitting on
+# the page, it's where the page's linework comes from. Palette pulls
+# straight from the mark: signal green (left snake) + signal blue (right
+# snake) on a near-black slate, never the generic indigo/purple SaaS
+# default. Everything is scoped under #ph-welcome-root.
 # =========================================================================
 def _inject_welcome_theme():
     st.markdown(
         """
         <style>
-        #ph-welcome-root {
-            --w-bg: #f5f7fa;
-            --w-editor: #1c2333;
-            --w-editor-line: #283150;
-            --w-editor-text: #c9d4ec;
-            --w-card: #ffffff;
-            --w-border: #e3e8f0;
-            --w-text: #1a2233;
-            --w-text-muted: #5b6478;
-            --w-text-faint: #97a1b5;
-            --w-green: #10b87e;
-            --w-blue: #2f7fe0;
-            --w-orange: #e0a82f;
-            --w-radius: 14px;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+        :root {
+            --w-bg: #0b0f14;
+            --w-panel: #10151d;
+            --w-panel-2: #131a24;
+            --w-border: rgba(255,255,255,0.08);
+            --w-border-strong: rgba(255,255,255,0.14);
+            --w-text: #e8edf4;
+            --w-text-dim: #8b96a8;
+            --w-text-faint: #586173;
+            --w-green: #3ddc97;
+            --w-green-deep: #0e9e63;
+            --w-blue: #5fb3f5;
+            --w-blue-deep: #1c6fc9;
+            --w-radius: 16px;
         }
-        #ph-welcome-root * { box-sizing: border-box; }
-
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
-
+        .w-scope, .w-scope * { box-sizing: border-box; }
         #ph-welcome-root {
+            display: block;
             background: var(--w-bg);
             border-radius: var(--w-radius);
             padding: 0;
             margin: -1rem -1rem 0 -1rem;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: visible;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        #ph-welcome-root, #ph-welcome-root p,
-        #ph-welcome-root div, #ph-welcome-root li {
-            color: var(--w-text);
-        }
-        /* span color is reset narrowly (not globally) so our syntax-highlight
-           color classes below (.wh-str, .wh-num, .wh-comment, etc.) are never
-           shadowed by a same-or-lower-specificity catch-all */
-        #ph-welcome-root span:not([class^="wh-"]) {
-            color: var(--w-text);
-        }
-        #ph-welcome-root h1, #ph-welcome-root h2, #ph-welcome-root h3 {
+        /* Each st.markdown() call is its own DOM fragment, so rules can't rely
+           on #ph-welcome-root as a real ancestor of later fragments — every
+           text rule below targets its own class directly with !important so
+           it always wins over app.py's blanket `p, span, label { color }`. */
+        .w-scope, .w-scope p, .w-scope div, .w-scope li, .w-scope span {
             color: var(--w-text) !important;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        .wh-mono { font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', Consolas, monospace; }
+        .w-scope h1, .w-scope h2, .w-scope h3 {
+            color: var(--w-text) !important;
+            font-family: 'Space Grotesk', sans-serif !important;
+        }
+        .w-mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
 
-        @keyframes whFadeIn {
-            from { opacity: 0; transform: translateY(6px); }
+        @keyframes wFadeUp {
+            from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        .wh-fade { animation: whFadeIn 0.45s cubic-bezier(0.16,1,0.3,1) both; }
-        .wh-d1 { animation-delay: 0.04s; }
-        .wh-d2 { animation-delay: 0.10s; }
-        .wh-d3 { animation-delay: 0.16s; }
-        .wh-d4 { animation-delay: 0.22s; }
-        .wh-d5 { animation-delay: 0.28s; }
+        @keyframes wTraceDraw {
+            from { stroke-dashoffset: 600; }
+            to   { stroke-dashoffset: 0; }
+        }
+        @keyframes wPulse {
+            0%, 100% { opacity: 0.5; }
+            50%      { opacity: 1; }
+        }
+        .w-fade { animation: wFadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+        .w-d1 { animation-delay: 0.04s; }
+        .w-d2 { animation-delay: 0.12s; }
+        .w-d3 { animation-delay: 0.20s; }
+        .w-d4 { animation-delay: 0.28s; }
 
-        /* ---------- THE FILE FRAME (signature element) ---------- */
-        .wh-file {
-            background: var(--w-card);
+        /* ---------- AMBIENT CIRCUIT BACKGROUND (drawn from the mark) ---------- */
+        .w-circuit-bg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 480px;
+            z-index: 0;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+        .w-circuit-bg path {
+            stroke-dasharray: 600;
+            animation: wTraceDraw 2.2s ease-out forwards;
+        }
+        .w-circuit-bg circle {
+            animation: wPulse 2.6s ease-in-out infinite;
+        }
+
+        /* ---------- HERO ---------- */
+        .w-hero {
+            position: relative;
+            z-index: 1;
+            padding: 3.2rem 2.4rem 2.6rem 2.4rem;
+            display: flex;
+            align-items: center;
+            gap: 2.2rem;
+            flex-wrap: wrap;
+        }
+        .w-hero-mark { flex: 0 0 auto; }
+        .w-hero-copy { flex: 1 1 320px; min-width: 280px; }
+        div.w-hero-eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--w-green) !important;
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .w-hero-eyebrow .w-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--w-green);
+            box-shadow: 0 0 6px var(--w-green);
+        }
+        .w-hero-title {
+            font-size: 2.7rem;
+            font-weight: 700;
+            line-height: 1.08;
+            margin: 0 0 0.7rem 0;
+            letter-spacing: -0.01em;
+        }
+        .w-hero-title .w-grad,
+        span.w-grad {
+            background: linear-gradient(90deg, var(--w-green) 0%, var(--w-blue) 100%) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: transparent !important;
+            -webkit-text-fill-color: transparent !important;
+        }
+        p.w-hero-tagline {
+            font-size: 1.08rem;
+            color: var(--w-text-dim) !important;
+            max-width: 480px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* ---------- STAT STRIP ---------- */
+        .w-stats {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1px;
+            background: var(--w-border);
             border: 1px solid var(--w-border);
             border-radius: var(--w-radius);
             overflow: hidden;
-            box-shadow: 0 1px 2px rgba(16,24,40,0.05);
-            margin-bottom: 1.4rem;
+            margin: 0 2.4rem 2.2rem 2.4rem;
+            width: auto;
+            max-width: 100%;
         }
-
-        /* tab bar */
-        .wh-tabbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--w-editor);
-            padding: 0.65rem 1rem;
-        }
-        .wh-tabbar-left { display: flex; align-items: center; gap: 0.9rem; }
-        .wh-dots { display: flex; gap: 0.4rem; }
-        .wh-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .wh-dot-r { background: #ff5f57; }
-        .wh-dot-y { background: #febc2e; }
-        .wh-dot-g { background: #28c840; }
-        .wh-filename {
-            font-size: 0.82rem;
-            font-weight: 500;
-            color: var(--w-editor-text);
-            letter-spacing: 0.01em;
-        }
-        .wh-filename .wh-modified {
-            display: inline-block;
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: var(--w-orange);
-            margin-left: 0.5rem;
-        }
-        .wh-branch {
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-            font-size: 0.74rem;
-            font-weight: 600;
-            color: #9fb4e8;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 999px;
-            padding: 0.25rem 0.7rem 0.25rem 0.55rem;
-        }
-
-        /* code body */
-        .wh-code {
-            background: var(--w-editor);
-            padding: 1.6rem 0 1.8rem 0;
-            overflow-x: auto;
-        }
-        .wh-line {
-            display: flex;
-            padding: 0 1.4rem;
-        }
-        .wh-lineno {
-            flex: 0 0 2.4rem;
-            color: #5e6996;
-            font-size: 0.82rem;
-            user-select: none;
-            text-align: right;
-            padding-right: 1.1rem;
-        }
-        .wh-linecontent {
-            flex: 1 1 auto;
+        .w-stat {
+            background: var(--w-panel);
+            padding: 1.3rem 1.4rem;
+            flex: 1 1 160px;
             min-width: 0;
-            font-size: 0.95rem;
-            line-height: 1.85;
-            color: var(--w-editor-text);
-            white-space: nowrap;
+            max-width: 100%;
         }
-        .wh-hero-line, .wh-hero-tagline {
-            white-space: normal;
+        div.w-stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--w-text-faint) !important;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.45rem;
         }
-        .wh-str { color: #f0b86e; }
-        .wh-kw { color: #c792ea; }
-        .wh-num { color: #82d4c0; }
-        .wh-key { color: #7fc8f8; }
-        .wh-comment { color: #6b7694; }
-        .wh-fn { color: #82d4c0; }
-        .wh-punct { color: #8a96b8; }
-
-        .wh-hero-line {
-            font-size: 1.5rem !important;
+        .w-stat-value {
+            font-size: 1.9rem;
             font-weight: 700;
-            line-height: 1.5 !important;
+            line-height: 1;
         }
-        .wh-hero-tagline { font-size: 1.02rem !important; color: #9aa6c8 !important; }
+        .w-stat-value.w-num-green { color: var(--w-green) !important; }
+        .w-stat-value.w-num-blue { color: var(--w-blue) !important; }
+        .w-stat-value.w-num-dim { font-size: 1.0rem; font-weight: 500; color: var(--w-text-faint) !important; font-family: 'JetBrains Mono', monospace; }
 
-        /* glyph row inside the file (logo-echo, restrained) */
-        .wh-glyphrow {
+        /* ---------- SECTION LABEL ---------- */
+        .w-section-label {
             display: flex;
             align-items: center;
             gap: 0.7rem;
-            padding: 0.5rem 1.4rem 0 1.4rem;
+            margin: 0 2.4rem 1rem 2.4rem;
         }
-        .wh-glyph {
-            flex: 0 0 auto;
-            width: 30px; height: 34px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .wh-glyphrow-text {
-            font-size: 0.86rem;
-            color: var(--w-editor-text);
-            opacity: 0.65;
-        }
-
-        /* ---------- SECTION LABEL = COMMENT ---------- */
-        .wh-section-comment {
+        .w-section-label .w-num {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.84rem;
-            font-weight: 500;
-            color: var(--w-text-faint);
-            margin: 1.7rem 0 0.7rem 0.2rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--w-text-faint) !important;
+            border: 1px solid var(--w-border-strong);
+            border-radius: 6px;
+            padding: 0.15rem 0.5rem;
         }
-        .wh-section-comment .wh-hash { color: var(--w-green); font-weight: 700; }
+        .w-section-label .w-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--w-text) !important;
+        }
+        .w-section-label::after {
+            content: '';
+            flex: 1 1 auto;
+            height: 1px;
+            background: var(--w-border);
+        }
 
-        /* ---------- MISSION BLOCK (docstring card) ---------- */
-        .wh-docstring-card {
-            background: var(--w-card);
+        /* ---------- MISSION CARD ---------- */
+        .w-mission {
+            position: relative;
+            z-index: 1;
+            margin: 0 2.4rem 2.2rem 2.4rem;
+            background: var(--w-panel);
             border: 1px solid var(--w-border);
             border-left: 3px solid var(--w-green);
             border-radius: var(--w-radius);
-            padding: 1.4rem 1.6rem;
-            margin-bottom: 0.4rem;
-            box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+            padding: 1.5rem 1.7rem;
         }
-        .wh-docstring-quote {
+        div.w-mission-quote {
             font-family: 'JetBrains Mono', monospace;
-            color: var(--w-green);
-            font-size: 0.85rem;
-            margin-bottom: 0.55rem;
-            font-weight: 600;
-        }
-        .wh-docstring-text {
-            font-size: 0.95rem;
-            color: var(--w-text-muted);
-            line-height: 1.65;
-        }
-        .wh-docstring-text strong { color: var(--w-text); }
-
-        /* ---------- CONTRIBUTION FUNCTION BLOCK ---------- */
-        .wh-fnblock {
-            background: var(--w-editor);
-            border-radius: var(--w-radius);
-            padding: 1.5rem 0 1.6rem 0;
-            box-shadow: 0 1px 2px rgba(16,24,40,0.04);
-            margin-bottom: 0.4rem;
-        }
-        .wh-fn-line {
-            display: flex;
-            padding: 0.6rem 1.4rem;
-            align-items: baseline;
-            gap: 1.1rem;
-            flex-wrap: wrap;
-        }
-        .wh-fn-call {
-            font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', Consolas, monospace;
-            font-size: 0.92rem;
-            font-weight: 600;
-            color: #82d4c0;
-            flex: 0 0 auto;
-            white-space: nowrap;
-            min-width: 9.5rem;
-        }
-        .wh-fn-call .wh-blue { color: #7fc8f8; }
-        .wh-fn-desc {
-            flex: 1 1 240px;
+            color: var(--w-green) !important;
             font-size: 0.86rem;
-            color: #9aa6c8;
-            line-height: 1.55;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
         }
-        .wh-fn-desc strong { color: #e3e8f7; }
-        .wh-fn-divider {
-            border-top: 1px solid rgba(255,255,255,0.06);
-            margin: 0 1.4rem;
+        div.w-mission-text {
+            font-size: 0.97rem;
+            color: var(--w-text-dim) !important;
+            line-height: 1.7;
+        }
+        .w-mission-text strong { color: var(--w-text) !important; }
+
+        /* ---------- WORKFLOW RAIL ---------- */
+        .w-rail {
+            position: relative;
+            z-index: 1;
+            margin: 0 2.4rem 2.6rem 2.4rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            width: auto;
+            max-width: 100%;
+        }
+        .w-rail-step {
+            background: var(--w-panel);
+            border: 1px solid var(--w-border);
+            border-radius: var(--w-radius);
+            padding: 1.3rem 1.3rem 1.4rem 1.3rem;
+            position: relative;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+            flex: 1 1 calc(25% - 0.75rem);
+            min-width: 200px;
+            max-width: 100%;
+        }
+        .w-rail-step:hover {
+            border-color: var(--w-border-strong);
+            transform: translateY(-2px);
+        }
+        .w-rail-connector {
+            position: absolute;
+            top: 1.6rem;
+            right: -0.85rem;
+            width: 1rem; height: 1px;
+            background: var(--w-border-strong);
+            z-index: 2;
+        }
+        div.w-rail-call {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--w-green) !important;
+            margin-bottom: 0.6rem;
+        }
+        .w-rail-call .w-blue { color: var(--w-blue) !important; }
+        div.w-rail-desc-title {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: var(--w-text) !important;
+            margin-bottom: 0.35rem;
+        }
+        div.w-rail-desc {
+            font-size: 0.85rem;
+            color: var(--w-text-dim) !important;
+            line-height: 1.55;
         }
 
         /* responsive */
-        @media (max-width: 640px) {
-            .wh-hero-line { font-size: 1.15rem !important; }
-            .wh-lineno { flex: 0 0 1.7rem; padding-right: 0.6rem; }
-            .wh-fn-line { flex-direction: column; gap: 0.3rem; }
-            .wh-fn-call { min-width: 0; flex-basis: auto; }
-            .wh-fn-desc { flex-basis: auto; }
+        @media (max-width: 900px) {
+            .w-rail-connector { display: none; }
         }
-
-        /* reduced motion */
+        @media (max-width: 640px) {
+            .w-hero { padding: 2.2rem 1.4rem 2rem 1.4rem; }
+            .w-hero-title { font-size: 2rem; }
+            .w-stats, .w-mission, .w-rail, .w-section-label { margin-left: 1.4rem; margin-right: 1.4rem; }
+        }
         @media (prefers-reduced-motion: reduce) {
-            .wh-fade { animation: none !important; }
+            .w-fade, .w-circuit-bg path, .w-circuit-bg circle { animation: none !important; }
         }
         </style>
         """,
@@ -269,24 +308,72 @@ def _inject_welcome_theme():
     )
 
 
-def _mini_glyph_svg():
-    """Small restrained echo of the shield/snake logo mark — not a recreation,
-    just a nod via the brace + gradient motif, kept tiny and quiet."""
+def _circuit_background_svg():
+    """Ambient circuit traces — literally extending the shield mark's own
+    leads outward across the hero, so the background pattern reads as
+    'more of the logo' rather than decorative filler."""
     return """
-    <div class="wh-glyph">
-        <svg width="26" height="30" viewBox="0 0 26 30" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="whMiniGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#10b87e"/>
-                    <stop offset="100%" stop-color="#2f7fe0"/>
-                </linearGradient>
-            </defs>
-            <path d="M13 1 L24 6 V18 C24 24 19 28 13 29 C7 28 2 24 2 18 V6 Z"
-                  fill="url(#whMiniGrad)" opacity="0.95"/>
-            <text x="13" y="19" text-anchor="middle" font-family="'JetBrains Mono', 'SF Mono', Consolas, monospace"
-                  font-size="11" font-weight="700" fill="#ffffff">{}</text>
-        </svg>
-    </div>
+    <svg class="w-circuit-bg" viewBox="0 0 1200 480" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 90 H180 L220 50 H420" fill="none" stroke="#3ddc97" stroke-width="1.5" opacity="0.5"/>
+        <path d="M0 220 H120 L155 255 H380 L410 220 H600" fill="none" stroke="#3ddc97" stroke-width="1.5" opacity="0.4"/>
+        <path d="M1200 90 H1020 L980 50 H800" fill="none" stroke="#5fb3f5" stroke-width="1.5" opacity="0.5"/>
+        <path d="M1200 220 H1080 L1045 255 H840 L810 220 H640" fill="none" stroke="#5fb3f5" stroke-width="1.5" opacity="0.4"/>
+        <path d="M0 380 H260 L295 410 H520" fill="none" stroke="#3ddc97" stroke-width="1.5" opacity="0.3"/>
+        <path d="M1200 380 H940 L905 410 H700" fill="none" stroke="#5fb3f5" stroke-width="1.5" opacity="0.3"/>
+        <circle cx="420" cy="50" r="3.5" fill="#3ddc97"/>
+        <circle cx="600" cy="220" r="3.5" fill="#3ddc97"/>
+        <circle cx="800" cy="50" r="3.5" fill="#5fb3f5"/>
+        <circle cx="640" cy="220" r="3.5" fill="#5fb3f5"/>
+        <circle cx="520" cy="410" r="3" fill="#3ddc97" opacity="0.7"/>
+        <circle cx="700" cy="410" r="3" fill="#5fb3f5" opacity="0.7"/>
+    </svg>
+    """
+
+
+def _hero_mark_svg(size=128):
+    """The recreated brand mark — twin-snake shield with {} core. Built as
+    clean geometric S-curves (not a literal trace of the source artwork),
+    same shield silhouette, green/blue split, brace glyph, and circuit
+    leads as the source mark."""
+    return f"""
+    <svg width="{size}" height="{int(size*1.19)}" viewBox="0 0 160 190" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="whGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3ddc97"/>
+                <stop offset="100%" stop-color="#0e9e63"/>
+            </linearGradient>
+            <linearGradient id="whBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#5fb3f5"/>
+                <stop offset="100%" stop-color="#1c6fc9"/>
+            </linearGradient>
+            <clipPath id="whShieldClip">
+                <path d="M80 8 L146 32 V92 C146 134 116 162 80 180 C44 162 14 134 14 92 V32 Z"/>
+            </clipPath>
+        </defs>
+        <path d="M80 8 L146 32 V92 C146 134 116 162 80 180 C44 162 14 134 14 92 V32 Z" fill="#101723"/>
+        <g clip-path="url(#whShieldClip)">
+            <path d="M14 8 H80 V180 H14
+                     C14 180 46 160 46 130 C46 108 14 100 14 80
+                     C14 60 50 56 50 36 C50 18 14 22 14 8 Z" fill="url(#whGreen)"/>
+            <circle cx="34" cy="22" r="3" fill="#0b1118"/>
+            <path d="M146 8 H80 V180 H146
+                     C146 180 114 160 114 130 C114 108 146 100 146 80
+                     C146 60 110 56 110 36 C110 18 146 22 146 8 Z" fill="url(#whBlue)"/>
+            <circle cx="126" cy="22" r="3" fill="#0b1118"/>
+        </g>
+        <path d="M80 8 L146 32 V92 C146 134 116 162 80 180 C44 162 14 134 14 92 V32 Z"
+              fill="none" stroke="#1e2733" stroke-width="2"/>
+        <text x="80" y="108" text-anchor="middle" font-family="'JetBrains Mono', monospace"
+              font-size="34" font-weight="700" fill="#0b1118">{{ }}</text>
+        <line x1="50" x2="22" y1="30" y2="10" stroke="#3ddc97" stroke-width="2"/>
+        <circle cx="20" cy="8" r="3" fill="#3ddc97"/>
+        <line x1="110" x2="138" y1="30" y2="10" stroke="#5fb3f5" stroke-width="2"/>
+        <circle cx="140" cy="8" r="3" fill="#5fb3f5"/>
+        <line x1="14" x2="-8" y1="80" y2="80" stroke="#3ddc97" stroke-width="2"/>
+        <circle cx="-10" cy="80" r="3" fill="#3ddc97"/>
+        <line x1="146" x2="168" y1="80" y2="80" stroke="#5fb3f5" stroke-width="2"/>
+        <circle cx="170" cy="80" r="3" fill="#5fb3f5"/>
+    </svg>
     """
 
 
@@ -305,93 +392,63 @@ def render_welcome_page(project_map):
     patches_merged = sum(1 for meta in project_map.values() if not meta.get("limitations"))
     # Likewise, "community pull requests" has no local data source yet — shown
     # as a placeholder until the roadmap's GitHub API integration lands.
-    community_prs_display = "None  # pending GitHub API integration"
+    community_prs_display = "pending API"
 
     _inject_welcome_theme()
 
     st.markdown('<div id="ph-welcome-root">', unsafe_allow_html=True)
+    st.markdown(_circuit_background_svg(), unsafe_allow_html=True)
 
-    # ================= THE FILE: tab bar + docstring hero + stats dict =================
+    # ================= HERO =================
     st.markdown(
         f"""
-        <div class="wh-file wh-fade wh-d1">
-            <div class="wh-tabbar">
-                <div class="wh-tabbar-left">
-                    <div class="wh-dots">
-                        <span class="wh-dot wh-dot-r"></span>
-                        <span class="wh-dot wh-dot-y"></span>
-                        <span class="wh-dot wh-dot-g"></span>
-                    </div>
-                    <span class="wh-filename wh-mono">welcome.py<span class="wh-modified"></span></span>
-                </div>
-                <div class="wh-branch wh-mono">⎇ main</div>
-            </div>
-            <div class="wh-code">
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">1</span>
-                    <span class="wh-linecontent wh-mono"><span class="wh-punct">&quot;&quot;&quot;</span></span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">2</span>
-                    <span class="wh-linecontent wh-mono wh-hero-line">PySource Hub</span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">3</span>
-                    <span class="wh-linecontent wh-mono wh-hero-tagline">Read real, working code. Find what's broken. Patch it live.</span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">4</span>
-                    <span class="wh-linecontent wh-mono"><span class="wh-punct">&quot;&quot;&quot;</span></span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">5</span>
-                    <span class="wh-linecontent wh-mono">&nbsp;</span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">6</span>
-                    <span class="wh-linecontent wh-mono"><span class="wh-key">STATS</span> <span class="wh-punct">=</span> <span class="wh-punct">{{</span></span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">7</span>
-                    <span class="wh-linecontent wh-mono">&nbsp;&nbsp;&nbsp;&nbsp;<span class="wh-str">'active_repos'</span><span class="wh-punct">:</span> <span class="wh-num">{total_repos}</span><span class="wh-punct">,</span>&nbsp;&nbsp;<span class="wh-comment"># catalog modules loaded</span></span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">8</span>
-                    <span class="wh-linecontent wh-mono">&nbsp;&nbsp;&nbsp;&nbsp;<span class="wh-str">'patches_merged'</span><span class="wh-punct">:</span> <span class="wh-num">{patches_merged}</span><span class="wh-punct">,</span>&nbsp;&nbsp;<span class="wh-comment"># modules with zero open issues</span></span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">9</span>
-                    <span class="wh-linecontent wh-mono">&nbsp;&nbsp;&nbsp;&nbsp;<span class="wh-str">'open_challenges'</span><span class="wh-punct">:</span> <span class="wh-num">{total_open_challenges}</span><span class="wh-punct">,</span>&nbsp;&nbsp;<span class="wh-comment"># limitations across all modules</span></span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">10</span>
-                    <span class="wh-linecontent wh-mono">&nbsp;&nbsp;&nbsp;&nbsp;<span class="wh-str">'community_prs'</span><span class="wh-punct">:</span> <span class="wh-kw">{community_prs_display}</span></span>
-                </div>
-                <div class="wh-line">
-                    <span class="wh-lineno wh-mono">11</span>
-                    <span class="wh-linecontent wh-mono"><span class="wh-punct">}}</span></span>
-                </div>
-                <div class="wh-line" style="margin-top: 0.3rem;">
-                    <span class="wh-lineno wh-mono">&nbsp;</span>
-                    <span class="wh-linecontent wh-mono">&nbsp;</span>
-                </div>
-                <div class="wh-glyphrow">{_mini_glyph_svg()}<span class="wh-glyphrow-text">An open-source Python micro-CMS &amp; practice sandbox.</span></div>
+        <div class="w-hero w-scope">
+            <div class="w-hero-mark w-fade w-d1">{_hero_mark_svg(120)}</div>
+            <div class="w-hero-copy w-fade w-d2">
+                <div class="w-hero-eyebrow"><span class="w-dot"></span>OPEN-SOURCE &middot; PYTHON &middot; LIVE CODE</div>
+                <h1 class="w-hero-title">Py<span class="w-grad">Source</span> Hub</h1>
+                <p class="w-hero-tagline">Read real, working code. Find what's broken. Patch it live.</p>
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # ================= CORE MISSION — comment + docstring card =================
+    # ================= STAT STRIP =================
     st.markdown(
-        '<div class="wh-section-comment wh-fade wh-d2"><span class="wh-hash"># </span>core mission</div>',
+        f"""
+        <div class="w-stats w-fade w-d3 w-scope">
+            <div class="w-stat">
+                <div class="w-stat-label w-mono">ACTIVE_REPOS</div>
+                <div class="w-stat-value w-num-green">{total_repos}</div>
+            </div>
+            <div class="w-stat">
+                <div class="w-stat-label w-mono">PATCHES_MERGED</div>
+                <div class="w-stat-value w-num-blue">{patches_merged}</div>
+            </div>
+            <div class="w-stat">
+                <div class="w-stat-label w-mono">OPEN_CHALLENGES</div>
+                <div class="w-stat-value w-num-green">{total_open_challenges}</div>
+            </div>
+            <div class="w-stat">
+                <div class="w-stat-label w-mono">COMMUNITY_PRS</div>
+                <div class="w-stat-value w-num-dim w-mono">{community_prs_display}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # ================= CORE MISSION =================
+    st.markdown(
+        '<div class="w-section-label w-fade w-d3 w-scope"><span class="w-num w-mono">01</span><span class="w-title">Core mission</span></div>',
         unsafe_allow_html=True,
     )
     st.markdown(
         """
-        <div class="wh-docstring-card wh-fade wh-d2">
-            <div class="wh-docstring-quote">"Read-First, Patch-Second."</div>
-            <div class="wh-docstring-text">
+        <div class="w-mission w-fade w-d3 w-scope">
+            <div class="w-mission-quote w-mono">"Read-first, patch-second."</div>
+            <div class="w-mission-text">
                 Traditional platforms focus on competitive coding inside isolated browser
                 sandboxes. PySource Hub is engineered to bridge the gap between classroom
                 syntax and professional development — students enter an active,
@@ -404,32 +461,36 @@ def render_welcome_page(project_map):
         unsafe_allow_html=True,
     )
 
-    # ================= CONTRIBUTION WORKFLOW — as an actual function body =================
+    # ================= CONTRIBUTION WORKFLOW =================
     st.markdown(
-        '<div class="wh-section-comment wh-fade wh-d3"><span class="wh-hash"># </span>contribution workflow</div>',
+        '<div class="w-section-label w-fade w-d4 w-scope"><span class="w-num w-mono">02</span><span class="w-title">Contribution workflow</span></div>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        """
-        <div class="wh-fnblock wh-fade wh-d3">
-            <div class="wh-fn-line">
-                <span class="wh-fn-call wh-mono">git_clone<span class="wh-blue">()</span></span>
-                <span class="wh-fn-desc"><strong>Select a repository</strong> — pick a project from the sidebar index dropdown.</span>
+        f"""
+        <div class="w-rail w-fade w-d4 w-scope">
+            <div class="w-rail-step">
+                <div class="w-rail-connector"></div>
+                <div class="w-rail-call w-mono">git_clone<span class="w-blue">()</span></div>
+                <div class="w-rail-desc-title">Select a repository</div>
+                <div class="w-rail-desc">Pick a project from the sidebar index dropdown.</div>
             </div>
-            <div class="wh-fn-divider"></div>
-            <div class="wh-fn-line">
-                <span class="wh-fn-call wh-mono">audit<span class="wh-blue">(limitations)</span></span>
-                <span class="wh-fn-desc"><strong>Audit flaws</strong> — analyze the documented bugs or architectural limitations.</span>
+            <div class="w-rail-step">
+                <div class="w-rail-connector"></div>
+                <div class="w-rail-call w-mono">audit<span class="w-blue">(limitations)</span></div>
+                <div class="w-rail-desc-title">Audit flaws</div>
+                <div class="w-rail-desc">Analyze the documented bugs or architectural limitations.</div>
             </div>
-            <div class="wh-fn-divider"></div>
-            <div class="wh-fn-line">
-                <span class="wh-fn-call wh-mono">fork<span class="wh-blue">().patch(bug)</span></span>
-                <span class="wh-fn-desc"><strong>Fork &amp; code</strong> — link to GitHub, fork the repository, and patch the limitation locally.</span>
+            <div class="w-rail-step">
+                <div class="w-rail-connector"></div>
+                <div class="w-rail-call w-mono">fork<span class="w-blue">().patch(bug)</span></div>
+                <div class="w-rail-desc-title">Fork &amp; code</div>
+                <div class="w-rail-desc">Link to GitHub, fork the repository, and patch the limitation locally.</div>
             </div>
-            <div class="wh-fn-divider"></div>
-            <div class="wh-fn-line">
-                <span class="wh-fn-call wh-mono">git_push<span class="wh-blue">() → PR</span></span>
-                <span class="wh-fn-desc"><strong>Pull request</strong> — submit your code review request. Once merged, your optimized logic replaces the blueprint live.</span>
+            <div class="w-rail-step">
+                <div class="w-rail-call w-mono">git_push<span class="w-blue">() &rarr; PR</span></div>
+                <div class="w-rail-desc-title">Pull request</div>
+                <div class="w-rail-desc">Submit your code review request. Once merged, your optimized logic replaces the blueprint live.</div>
             </div>
         </div>
         """,

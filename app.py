@@ -9,48 +9,59 @@ CATALOG_DIR = "project_catalog"
 
 
 # =========================================================================
-# THEME / CSS INJECTION
+# THEME / CSS INJECTION — "Circuit Slate"
+# -------------------------------------------------------------------------
+# App-wide palette pulled from the brand mark (twin-snake shield): signal
+# green + signal blue on near-black slate. Replaces the prior generic
+# indigo SaaS look so every tab, the sidebar, the workspace, and the chat
+# panel share one identity with the home page.
 # =========================================================================
 def inject_custom_css():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
         :root {
-            --ph-bg: #0a0e14;
+            --ph-bg: #0b0f14;
             --ph-bg-elevated: #10151d;
-            --ph-surface: #131922;
+            --ph-surface: #131a24;
             --ph-surface-hover: #161d28;
             --ph-border: rgba(255, 255, 255, 0.08);
-            --ph-border-strong: rgba(255, 255, 255, 0.14);
-            --ph-accent: #6366f1;
-            --ph-accent-soft: rgba(99, 102, 241, 0.12);
-            --ph-accent-glow: rgba(99, 102, 241, 0.35);
-            --ph-text-primary: #e7eaf0;
-            --ph-text-secondary: #9aa4b2;
-            --ph-text-dim: #5f6878;
-            --ph-success: #22c55e;
-            --ph-success-soft: rgba(34, 197, 94, 0.10);
-            --ph-error: #f43f5e;
-            --ph-error-soft: rgba(244, 63, 94, 0.10);
-            --ph-info: #38bdf8;
-            --ph-info-soft: rgba(56, 189, 248, 0.10);
+            --ph-border-strong: rgba(255, 255, 255, 0.16);
+            --ph-green: #3ddc97;
+            --ph-green-deep: #0e9e63;
+            --ph-green-soft: rgba(61, 220, 151, 0.12);
+            --ph-blue: #5fb3f5;
+            --ph-blue-deep: #1c6fc9;
+            --ph-blue-soft: rgba(95, 179, 245, 0.12);
+            --ph-text-primary: #e8edf4;
+            --ph-text-secondary: #8b96a8;
+            --ph-text-dim: #586173;
+            --ph-success: #3ddc97;
+            --ph-success-soft: rgba(61, 220, 151, 0.10);
+            --ph-error: #f4615a;
+            --ph-error-soft: rgba(244, 97, 90, 0.10);
+            --ph-info: #5fb3f5;
+            --ph-info-soft: rgba(95, 179, 245, 0.10);
             --ph-radius: 14px;
             --ph-radius-sm: 10px;
         }
 
         /* ---------- GLOBAL BASE ---------- */
         html, body, [class*="css"] {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
         }
 
         .stApp {
-            background: radial-gradient(circle at 15% 0%, #11162033 0%, var(--ph-bg) 45%) fixed;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(61,220,151,0.05) 0%, transparent 45%),
+                radial-gradient(circle at 88% 8%, rgba(95,179,245,0.05) 0%, transparent 45%),
+                var(--ph-bg) fixed;
             color: var(--ph-text-primary);
         }
 
-        /* Hide default Streamlit chrome for a cleaner SaaS feel */
+        /* Hide default Streamlit chrome for a cleaner feel */
         #MainMenu { visibility: hidden; }
         footer { visibility: hidden; }
         header[data-testid="stHeader"] { background: transparent; }
@@ -73,9 +84,7 @@ def inject_custom_css():
         .ph-delay-2 { animation-delay: 0.14s; }
         .ph-delay-3 { animation-delay: 0.22s; }
 
-        /* Apply a gentle fade to Streamlit's own block containers so
-           switching tabs / reruns feels like a smooth glide-in */
-        div[data-testid="stVerticalBlockBorderWrapper"],
+        div[data-testid="stVerticalBlock"],
         div[data-testid="stTabs"] {
             animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
@@ -95,11 +104,11 @@ def inject_custom_css():
         }
         div[data-testid="stTabs"] button[aria-selected="true"] {
             color: #ffffff !important;
-            background: var(--ph-accent-soft);
-            border-bottom: 2px solid var(--ph-accent) !important;
+            background: var(--ph-green-soft);
+            border-bottom: 2px solid var(--ph-green) !important;
         }
         div[data-testid="stTabs"] div[data-baseweb="tab-highlight"] {
-            background-color: var(--ph-accent) !important;
+            background-color: var(--ph-green) !important;
         }
 
         /* ---------- SIDEBAR ---------- */
@@ -121,44 +130,14 @@ def inject_custom_css():
             transition: border-color 0.2s ease;
         }
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div:hover {
-            border-color: var(--ph-accent) !important;
+            border-color: var(--ph-green) !important;
         }
 
         /* ---------- HEADERS ---------- */
-        h1, h2, h3, h4 { color: var(--ph-text-primary) !important; font-weight: 700 !important; }
-
-        /* ---------- HERO (welcome page) ---------- */
-        .ph-hero {
-            padding: 2.6rem 2.2rem;
-            margin-bottom: 1.8rem;
-            border-radius: var(--ph-radius);
-            background: linear-gradient(135deg, rgba(99,102,241,0.14), rgba(99,102,241,0.02));
-            border: 1px solid var(--ph-border);
-            position: relative;
-            overflow: hidden;
-        }
-        .ph-hero-badge {
-            display: inline-block;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            color: var(--ph-accent);
-            background: var(--ph-accent-soft);
-            padding: 0.3rem 0.7rem;
-            border-radius: 999px;
-            margin-bottom: 0.9rem;
-        }
-        .ph-hero-title {
-            font-size: 2.6rem !important;
-            font-weight: 800 !important;
-            margin: 0 0 0.5rem 0 !important;
-            letter-spacing: -0.02em;
-        }
-        .ph-hero-subtitle {
-            color: var(--ph-text-secondary);
-            font-size: 1.08rem;
-            max-width: 720px;
-            margin: 0;
+        h1, h2, h3, h4 {
+            color: var(--ph-text-primary) !important;
+            font-weight: 700 !important;
+            font-family: 'Space Grotesk', sans-serif !important;
         }
 
         /* ---------- GENERIC CARD ---------- */
@@ -173,13 +152,14 @@ def inject_custom_css():
         .ph-card:hover {
             transform: translateY(-2px);
             border-color: var(--ph-border-strong);
-            box-shadow: 0 12px 28px -8px rgba(0,0,0,0.45);
+            box-shadow: 0 12px 28px -8px rgba(0,0,0,0.5);
         }
         .ph-card-eyebrow {
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.74rem;
             font-weight: 700;
-            letter-spacing: 0.07em;
-            color: var(--ph-accent);
+            letter-spacing: 0.06em;
+            color: var(--ph-green);
             margin-bottom: 0.6rem;
         }
         .ph-card-title {
@@ -197,33 +177,12 @@ def inject_custom_css():
             font-weight: 700;
             color: var(--ph-text-primary);
             margin: 1.6rem 0 0.7rem 0;
-        }
-
-        /* ---------- STEP LIST ---------- */
-        .ph-step {
             display: flex;
-            gap: 0.9rem;
-            align-items: flex-start;
-            padding: 0.7rem 0;
-            border-top: 1px solid var(--ph-border);
-            color: var(--ph-text-secondary);
-            font-size: 0.92rem;
-            line-height: 1.5;
+            align-items: center;
+            gap: 0.6rem;
         }
-        .ph-step:first-of-type { border-top: none; padding-top: 0.9rem; }
-        .ph-step-num {
-            flex-shrink: 0;
-            width: 26px; height: 26px;
-            border-radius: 50%;
-            background: var(--ph-accent-soft);
-            color: var(--ph-accent);
-            font-weight: 700;
-            font-size: 0.8rem;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .ph-step strong { color: var(--ph-text-primary); }
 
-        /* ---------- GLASSMORPHISM INFO / SUCCESS / ERROR (replacing st.info/error/success) ---------- */
+        /* ---------- GLASSMORPHISM INFO / SUCCESS / ERROR ---------- */
         .ph-glass-info, .ph-glass-success, .ph-glass-error {
             display: flex;
             gap: 0.8rem;
@@ -244,62 +203,24 @@ def inject_custom_css():
 
         .ph-glass-info {
             background: var(--ph-info-soft);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            color: #cdeffd;
+            border: 1px solid rgba(95, 179, 245, 0.28);
+            color: #d6ecfd;
         }
-        .ph-glass-info:hover { box-shadow: 0 10px 24px -8px rgba(56, 189, 248, 0.25); }
+        .ph-glass-info:hover { box-shadow: 0 10px 24px -8px rgba(95, 179, 245, 0.25); }
 
         .ph-glass-success {
             background: var(--ph-success-soft);
-            border: 1px solid rgba(34, 197, 94, 0.25);
-            color: #d6f5e2;
+            border: 1px solid rgba(61, 220, 151, 0.28);
+            color: #d8f7e8;
         }
-        .ph-glass-success:hover { box-shadow: 0 10px 24px -8px rgba(34, 197, 94, 0.25); }
-        .ph-glass-success-text {
-            color: var(--ph-text-secondary);
-            margin: 0.3rem 0 0 0;
-            font-size: 0.9rem;
-        }
+        .ph-glass-success:hover { box-shadow: 0 10px 24px -8px rgba(61, 220, 151, 0.25); }
 
         .ph-glass-error {
             background: var(--ph-error-soft);
-            border: 1px solid rgba(244, 63, 94, 0.25);
-            color: #fdd9e1;
+            border: 1px solid rgba(244, 97, 90, 0.28);
+            color: #fdd9d6;
         }
-        .ph-glass-error:hover { box-shadow: 0 10px 24px -8px rgba(244, 63, 94, 0.25); }
-
-        /* ---------- METRIC CARDS ---------- */
-        .ph-metric-card {
-            background: var(--ph-surface);
-            border: 1px solid var(--ph-border);
-            border-radius: var(--ph-radius);
-            padding: 1.3rem 1.5rem;
-            margin-bottom: 1rem;
-            transition: transform 0.25s ease, border-color 0.25s ease;
-        }
-        .ph-metric-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--ph-accent);
-        }
-        .ph-metric-label {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--ph-text-dim);
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-            margin-bottom: 0.4rem;
-        }
-        .ph-metric-value {
-            font-size: 1.9rem;
-            font-weight: 800;
-            color: var(--ph-text-primary);
-            line-height: 1.1;
-        }
-        .ph-metric-sub {
-            font-size: 0.82rem;
-            color: var(--ph-text-secondary);
-            margin-top: 0.2rem;
-        }
+        .ph-glass-error:hover { box-shadow: 0 10px 24px -8px rgba(244, 97, 90, 0.25); }
 
         /* ---------- WORKSPACE HEADER ---------- */
         .ph-workspace-header {
@@ -308,6 +229,15 @@ def inject_custom_css():
             background: var(--ph-surface);
             border: 1px solid var(--ph-border);
             margin-bottom: 1.4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .ph-workspace-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--ph-green), var(--ph-blue));
         }
         .ph-workspace-title {
             font-size: 1.5rem !important;
@@ -318,8 +248,8 @@ def inject_custom_css():
             display: inline-block;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.78rem;
-            color: var(--ph-accent);
-            background: var(--ph-accent-soft);
+            color: var(--ph-green);
+            background: var(--ph-green-soft);
             padding: 0.2rem 0.6rem;
             border-radius: 6px;
             margin-bottom: 0.6rem;
@@ -342,9 +272,9 @@ def inject_custom_css():
             padding: 0.7rem 1rem;
         }
         .ph-ide-dot { width: 11px; height: 11px; border-radius: 50%; }
-        .ph-ide-dot.red { background: #f43f5e; }
-        .ph-ide-dot.yellow { background: #f59e0b; }
-        .ph-ide-dot.green { background: #22c55e; }
+        .ph-ide-dot.red { background: #f4615a; }
+        .ph-ide-dot.yellow { background: #f0b84e; }
+        .ph-ide-dot.green { background: #3ddc97; }
         .ph-ide-filename {
             margin-left: 0.6rem;
             font-family: 'JetBrains Mono', monospace;
@@ -352,7 +282,6 @@ def inject_custom_css():
             color: var(--ph-text-secondary);
         }
 
-        /* Streamlit's expander, restyled to look like the body of the IDE window */
         div[data-testid="stExpander"] {
             border: 1px solid var(--ph-border) !important;
             border-top: none !important;
@@ -370,16 +299,18 @@ def inject_custom_css():
             color: var(--ph-text-primary) !important;
         }
 
-        /* Code block styling */
         pre, code {
             font-family: 'JetBrains Mono', monospace !important;
         }
-        div[data-testid="stCodeBlock"] {
+        div[data-testid="stCode"] {
             border-radius: var(--ph-radius-sm);
             border: 1px solid var(--ph-border);
         }
-        div[data-testid="stCodeBlock"] pre {
+        div[data-testid="stCode"] pre {
             background: #0c1018 !important;
+        }
+        div[data-testid="stCode"] pre code {
+            background: transparent !important;
         }
 
         /* ---------- AI MENTOR CHAT PANEL ---------- */
@@ -449,8 +380,8 @@ def inject_custom_css():
             transition: all 0.2s ease;
         }
         .ph-link-row a:hover {
-            border-color: var(--ph-accent);
-            color: var(--ph-accent) !important;
+            border-color: var(--ph-green);
+            color: var(--ph-green) !important;
             transform: translateY(-2px);
         }
 
